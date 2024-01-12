@@ -60,7 +60,7 @@ class Bd {
 			if(despesa === null) {
 				continue
 			}
-
+			despesa.id = i
 			despesas.push(despesa)
 		}
 
@@ -80,19 +80,16 @@ class Bd {
 		//ano
 
 		if(despesa.ano != ''){
-			console.log('filtro de ano ')
 			 despesasFiltradas = despesasFiltradas.filter(d => d.ano == despesa.ano)
 		}
 
 		//mes
 		if(despesa.mes != ''){
-			console.log('filtro de mes')
 			despesasFiltradas = despesasFiltradas.filter(d => d.mes == despesa.mes)
 		}
 
 		
-		if(despesa.dia != ''){
-			console.log('filtro de dia ')
+		if(despesa.dia != ''){	
 			 despesasFiltradas = despesasFiltradas.filter(d=> d.dia == despesa.dia)
 		}
 		//tipo
@@ -110,9 +107,13 @@ class Bd {
 
 
 
-		console.log(despesasFiltradas)
+		return despesasFiltradas
 
+	
 	}
+		remover(id){
+			localStorage.removeItem(id)
+  }
 }
 
 let bd = new Bd()
@@ -169,11 +170,17 @@ function cadastrarDespesa() {
 	}
 }
 
-function carregaListaDespesas() {
+function carregaListaDespesas(despesas = Array(), filtro = false) {
 
-	let despesas = Array()
+	if(despesas.length == 0 && filtro == false){
+		despesas = bd.recuperarTodosRegistros()
+	}
 
-	despesas = bd.recuperarTodosRegistros() 
+
+
+
+	let listaDespesas = document.getElementById("listaDespesas")
+	listaDespesas.innerHTML= ''
 
 	/*
 
@@ -186,7 +193,6 @@ function carregaListaDespesas() {
 
 	*/
 
-	let listaDespesas = document.getElementById("listaDespesas")
 
 	despesas.forEach(function(d){
 
@@ -213,6 +219,27 @@ function carregaListaDespesas() {
 		linha.insertCell(1).innerHTML = d.tipo
 		linha.insertCell(2).innerHTML = d.descricao
 		linha.insertCell(3).innerHTML = d.valor
+
+		//botão excluir 		btn.innerHTML = '<i class="fas f'
+
+		let btn = document.createElement("button")
+		btn.className ='btn btn-danger'
+		btn.innerHTML = '<i class="fas fa-times"></i>'
+		btn.id = `id_despesa_${d.id}`
+		btn.onclick = function(){
+
+			//remover a despesa
+			let id = this.id.replace('id_despesa_','')
+
+			//alert(id)
+
+			bd.remover(id)
+
+			window.location.reload()
+		}
+		linha.insertCell(4).append(btn)
+
+		console.log(d)
 		
 	})
 
@@ -230,7 +257,10 @@ function carregaListaDespesas() {
 
 	let despesa = new Despesa(ano, mes, dia, tipo, descricao, valor)
 
-     bd.pesquisar(despesa);
+	let despesas =  bd.pesquisar(despesa)
+    
+	this.carregaListaDespesas(despesas, true)
+
 
 
 	
